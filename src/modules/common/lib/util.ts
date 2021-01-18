@@ -65,3 +65,7 @@ export const getRandomColor = () => {
 export const toYYYYMMDD = (date: Date) => {
   return moment(date).format('YYYY-MM-DD');
 };
+
+export const toPercentile = (total: number, amount: number, digit = 1): string => {
+  return `${((amount / total) * 100).toFixed(digit)}%`;
+};

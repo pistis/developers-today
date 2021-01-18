@@ -4,7 +4,7 @@ import { CCard, CCardBody, CButton, CCardHeader, CCollapse } from '@coreui/react
 import { CNav, CNavItem, CNavLink, CTabContent, CTabPane, CTabs } from '@coreui/react';
 import { CChartPie } from '@coreui/react-chartjs';
 import { projectStatistics, categoryStatistics, titleStatistics } from 'src/modules/common/lib/statistics';
-import { minutes2HHMM, getRandomColor } from 'src/modules/common/lib/util';
+import { minutes2HHMM, getRandomColor, toPercentile } from 'src/modules/common/lib/util';
 
 type Props = {
   title: string;
@@ -26,7 +26,9 @@ const TaskStatistics: React.FC<Props> = ({ title, projects, categories, tasks })
         data: projectGroupTasks.map(({ minutes }) => minutes),
       },
     ],
-    labels: projectGroupTasks.map(({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)}`),
+    labels: projectGroupTasks.map(
+      ({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)} (${toPercentile(projectTotalSpentMinutes, minutes)})`
+    ),
     options: {
       tooltips: {
         enabled: true,
@@ -47,7 +49,9 @@ const TaskStatistics: React.FC<Props> = ({ title, projects, categories, tasks })
         data: categoryGroupTasks.map(({ minutes }) => minutes),
       },
     ],
-    labels: categoryGroupTasks.map(({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)}`),
+    labels: categoryGroupTasks.map(
+      ({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)} (${toPercentile(categoryTotalSpentMinutes, minutes)})`
+    ),
     options: {
       tooltips: {
         enabled: true,
@@ -68,7 +72,9 @@ const TaskStatistics: React.FC<Props> = ({ title, projects, categories, tasks })
         data: titleGroupTasks.map(({ minutes }) => minutes),
       },
     ],
-    labels: titleGroupTasks.map(({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)}`),
+    labels: titleGroupTasks.map(
+      ({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)} (${toPercentile(titleTotalSpentMinutes, minutes)})`
+    ),
     options: {
       tooltips: {
         enabled: true,
