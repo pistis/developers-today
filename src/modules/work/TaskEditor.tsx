@@ -3,6 +3,8 @@ import React, { useState, useCallback } from 'react';
 import { CCol } from '@coreui/react';
 import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react';
 import { CForm, CFormGroup, CTextarea, CInput, CLabel, CSelect } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCollapse } from '@coreui/react';
+
 import CIcon from '@coreui/icons-react';
 import useForm, { IReturnUseForm } from 'src/modules/common/hooks/useForm';
 import useTaskListByProject from 'src/modules/common/hooks/api/useTaskListByProject';
@@ -124,12 +126,13 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
         onUpdated();
       } catch (e) {
         alert(`업무 생성 오류 : ${e}`);
+        throw e;
       }
     },
     [tasks, updatingTask, date, onUpdated]
   );
 
-  const { values, errors, submitting, handleChange, handleSubmit, setValue }: IReturnUseForm<ITask> = useForm<ITask>({
+  const { values, errors, submitting, handleChange, handleSubmit, setValues }: IReturnUseForm<ITask> = useForm<ITask>({
     initialValues,
     onSubmit,
     validate,
@@ -152,9 +155,15 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
 
   const handleChangeTaskByProject = (e: React.ChangeEvent<any>) => {
     const { value } = e.target;
-    setValue('title', value);
+    const task = tasksByProject.find((task: ITask) => {
+      return task.id == value;
+    });
+    const title = task ? task.title : '';
+    const contents = task ? task.contents : '';
+    setValues((prevValues) => ({ ...prevValues, title, contents }));
   };
 
+  const [optionCollapse, setOptionCollapse] = useState(false);
   return (
     <>
       <CModal show={show} onClose={onHide} centered>
@@ -203,24 +212,45 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
             </CFormGroup>
             <CFormGroup row>
               <CCol md="2">
-                <CLabel htmlFor="task-by-project-select">업무 검색 시작일</CLabel>
+                <CLabel htmlFor="task-select-option">업무 선택 옵션</CLabel>
               </CCol>
               <CCol md="10">
-                <CInput
-                  type="date"
-                  name="startDate"
-                  value={startDate}
-                  onChange={handleChangeStartDate}
-                  placeholder="date"
-                />
-              </CCol>
-            </CFormGroup>
-            <CFormGroup row>
-              <CCol md="2">
-                <CLabel htmlFor="task-by-project-select">업무 검색 종료일</CLabel>
-              </CCol>
-              <CCol md="10">
-                <CInput type="date" name="endDate" value={endDate} onChange={handleChangeEndDate} placeholder="date" />
+                <CCard>
+                  <CCardHeader>
+                    <p>프로젝트 선택 필수</p>
+                    <p>
+                      {startDate} ~ {endDate}에 등록된 업무
+                    </p>
+                    <CButton
+                      color="info"
+                      variant="outline"
+                      size="sm"
+                      className="ml-1"
+                      onClick={() => {
+                        setOptionCollapse(!optionCollapse);
+                      }}>
+                      기간 변경 {optionCollapse ? '감추기' : '보기'}
+                    </CButton>
+                  </CCardHeader>
+                  <CCollapse show={optionCollapse}>
+                    <CCardBody>
+                      <CInput
+                        type="date"
+                        name="startDate"
+                        value={startDate}
+                        onChange={handleChangeStartDate}
+                        placeholder="date"
+                      />
+                      <CInput
+                        type="date"
+                        name="endDate"
+                        value={endDate}
+                        onChange={handleChangeEndDate}
+                        placeholder="date"
+                      />
+                    </CCardBody>
+                  </CCollapse>
+                </CCard>
               </CCol>
             </CFormGroup>
             <CFormGroup row>
@@ -231,7 +261,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
                 <CSelect id="task-by-project-select" value={''} onChange={handleChangeTaskByProject}>
                   <option value="">업무 선택</option>
                   {tasksByProject.map((task: ITask) => (
-                    <option key={task.id} value={task.title}>
+                    <option key={task.id} value={task.id}>
                       {task.date} - {task.title}
                       {task.contents ? `(${task.contents})` : ''}
                     </option>

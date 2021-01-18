@@ -8,6 +8,7 @@ export interface IReturnUseForm<T> {
   handleChange: (event: React.ChangeEvent<any>) => void;
   handleSubmit: (event: React.FormEvent) => void;
   setValue: (name: string, value: any) => void;
+  setValues: React.Dispatch<React.SetStateAction<T>>;
 }
 
 const useForm = <T>({
@@ -42,11 +43,18 @@ const useForm = <T>({
     setValues(initialValues);
   };
 
+  const submit = async () => {
+    try {
+      await onSubmit(values);
+      clear();
+    } catch (e) {
+      console.error(e); // TODO : ? 에러처리를 특별히 해야할까?
+    }
+  };
   useEffect(() => {
     if (submitting) {
       if (Object.keys(errors).length === 0) {
-        onSubmit(values);
-        clear();
+        submit();
       }
       setSubmitting(false);
     }
@@ -60,6 +68,7 @@ const useForm = <T>({
     handleChange,
     handleSubmit,
     setValue,
+    setValues,
   };
 };
 
