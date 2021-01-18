@@ -1,5 +1,5 @@
 import { IProject, ICategory, ITask } from 'src/@types/';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { CCol } from '@coreui/react';
 import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react';
 import { CForm, CFormGroup, CTextarea, CInput, CLabel, CSelect } from '@coreui/react';
@@ -86,19 +86,10 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
     }
   }
 
-  const {
-    values,
-    errors,
-    submitting,
-    clear,
-    handleChange,
-    handleSubmit,
-    setValue,
-  }: IReturnUseForm<ITask> = useForm<ITask>({
-    initialValues,
-    onSubmit: async (values: ITask) => {
+  const onSubmit = useCallback(
+    async (values: ITask) => {
       const task: ITask = {
-        date: values.date,
+        date: date,
         projectId: Number(values.projectId),
         categoryId: Number(values.categoryId),
         title: values.title,
@@ -130,12 +121,17 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
           await TaskApi.create(task);
         }
 
-        clear();
         onUpdated();
       } catch (e) {
         alert(`업무 생성 오류 : ${e}`);
       }
     },
+    [tasks, updatingTask, date, onUpdated]
+  );
+
+  const { values, errors, submitting, handleChange, handleSubmit, setValue }: IReturnUseForm<ITask> = useForm<ITask>({
+    initialValues,
+    onSubmit,
     validate,
   });
 

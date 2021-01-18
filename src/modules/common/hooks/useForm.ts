@@ -46,6 +46,7 @@ const useForm = <T>({
     if (submitting) {
       if (Object.keys(errors).length === 0) {
         onSubmit(values);
+        clear();
       }
       setSubmitting(false);
     }
