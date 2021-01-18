@@ -1,0 +1,330 @@
+import { IProject, ICategory, ITask } from 'src/@types/';
+import React, { useState } from 'react';
+import { CCol } from '@coreui/react';
+import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react';
+import { CForm, CFormGroup, CTextarea, CInput, CLabel, CSelect } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import useForm, { IReturnUseForm } from 'src/modules/common/hooks/useForm';
+import useTaskListByProject from 'src/modules/common/hooks/api/useTaskListByProject';
+import validate from './validate';
+import TaskApi from './api';
+import moment from 'moment';
+
+const checkAllowTaskTime = (tasks: ITask[], task: ITask) => {
+  const taskId = task.id;
+  const newStartTimeMs = task.startTime ? moment.duration(task.startTime).asMilliseconds() : -1;
+  const newEndTimeMs = task.endTime ? moment.duration(task.endTime).asMilliseconds() : -1;
+
+  let times = tasks.map((task: ITask) => {
+    const endTimeMs = task.endTime ? moment.duration(task.endTime).asMilliseconds() : -1;
+    const startTimeMs = task.startTime ? moment.duration(task.startTime).asMilliseconds() : -1;
+    return {
+      id: task.id,
+      title: task.title,
+      startTimeMs,
+      endTimeMs,
+    };
+  });
+
+  times = times.filter(({ startTimeMs, endTimeMs }: any) => {
+    return startTimeMs >= 0 && endTimeMs >= 0;
+  });
+
+  times.forEach(({ id, title, startTimeMs, endTimeMs }: any) => {
+    if (id === taskId) return;
+    if (startTimeMs < newStartTimeMs && newStartTimeMs < endTimeMs)
+      throw new Error(`업무(${title})의 시작/종료 시간과 겹칩니다.`);
+    if (startTimeMs < newEndTimeMs && newEndTimeMs < endTimeMs)
+      throw new Error(`업무(${title})의 시작/종료 시간과 겹칩니다.`);
+  });
+};
+
+type TaskEditorProps = {
+  show: boolean;
+  projects: IProject[];
+  categories: ICategory[];
+  tasks: ITask[];
+  date: string;
+  task?: ITask | null;
+  onUpdated: () => void;
+  onHide: () => void;
+};
+
+const TaskEditor: React.FC<TaskEditorProps> = ({
+  show,
+  projects,
+  categories,
+  tasks,
+  date,
+  task: updatingTask,
+  onUpdated,
+  onHide,
+}) => {
+  const title = updatingTask ? '업무 수정' : '업무 생성';
+  const initialValues: ITask = {
+    projectId: 0,
+    categoryId: 0,
+    date: date,
+    title: '',
+    contents: '',
+    link: '',
+    startTime: '',
+    endTime: '',
+  };
+
+  if (updatingTask) {
+    initialValues.projectId = updatingTask.projectId;
+    initialValues.categoryId = updatingTask.categoryId;
+    initialValues.title = updatingTask.title;
+    initialValues.contents = updatingTask.contents;
+    initialValues.link = updatingTask.link;
+    if (updatingTask.startTime) {
+      initialValues.startTime = updatingTask.startTime;
+    }
+    if (updatingTask.endTime) {
+      initialValues.endTime = updatingTask.endTime;
+    }
+  }
+
+  const {
+    values,
+    errors,
+    submitting,
+    clear,
+    handleChange,
+    handleSubmit,
+    setValue,
+  }: IReturnUseForm<ITask> = useForm<ITask>({
+    initialValues,
+    onSubmit: async (values: ITask) => {
+      const task: ITask = {
+        date: values.date,
+        projectId: Number(values.projectId),
+        categoryId: Number(values.categoryId),
+        title: values.title,
+        contents: values.contents,
+        link: values.link,
+      };
+
+      if (values.startTime) {
+        task.startTime = values.startTime;
+        if (task.startTime.split(':').length === 2) {
+          task.startTime = `${task.startTime}:00`;
+        }
+      }
+
+      if (values.endTime) {
+        task.endTime = values.endTime;
+        if (task.endTime.split(':').length === 2) {
+          task.endTime = `${task.endTime}:00`;
+        }
+      }
+
+      try {
+        if (updatingTask) {
+          task.id = updatingTask.id;
+          checkAllowTaskTime(tasks, task);
+          await TaskApi.update(task);
+        } else {
+          checkAllowTaskTime(tasks, task);
+          await TaskApi.create(task);
+        }
+
+        clear();
+        onUpdated();
+      } catch (e) {
+        alert(`업무 생성 오류 : ${e}`);
+      }
+    },
+    validate,
+  });
+
+  const initialStartDate = moment(new Date(date)).subtract(7, 'days').format('YYYY-MM-DD');
+  const [startDate, setStartDate] = useState(initialStartDate);
+  const handleChangeStartDate = (e: React.ChangeEvent<any>) => {
+    const { value } = e.target;
+    setStartDate(value);
+  };
+
+  const [endDate, setEndDate] = useState(date);
+  const handleChangeEndDate = (e: React.ChangeEvent<any>) => {
+    const { value } = e.target;
+    setEndDate(value);
+  };
+
+  const [{ data: tasksByProject }] = useTaskListByProject(values.projectId, startDate, endDate, '');
+
+  const handleChangeTaskByProject = (e: React.ChangeEvent<any>) => {
+    const { value } = e.target;
+    setValue('title', value);
+  };
+
+  return (
+    <>
+      <CModal show={show} onClose={onHide} centered>
+        <CForm
+          onSubmit={handleSubmit}
+          action=""
+          method="post"
+          encType="multipart/form-data"
+          className="form-horizontal"
+          noValidate>
+          <CModalHeader closeButton>
+            <CModalTitle>{title}</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="project-select">프로젝트</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CSelect id="project-select" name="projectId" value={values.projectId} onChange={handleChange}>
+                  <option value="">프로젝트 선택</option>
+                  {projects.map((project: any) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </CSelect>
+                {errors.projectId && <span className="errorMessage">{errors.projectId}</span>}
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="category-select">카테고리</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CSelect id="category-select" name="categoryId" value={values.categoryId} onChange={handleChange}>
+                  <option value="">카테고리 선택</option>
+                  {categories.map((category: any) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </CSelect>
+                {errors.categoryId && <span className="errorMessage">{errors.categoryId}</span>}
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="task-by-project-select">업무 검색 시작일</CLabel>
+              </CCol>
+              <CCol md="10">
+                <CInput
+                  type="date"
+                  name="startDate"
+                  value={startDate}
+                  onChange={handleChangeStartDate}
+                  placeholder="date"
+                />
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="task-by-project-select">업무 검색 종료일</CLabel>
+              </CCol>
+              <CCol md="10">
+                <CInput type="date" name="endDate" value={endDate} onChange={handleChangeEndDate} placeholder="date" />
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="task-by-project-select">업무 선택</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CSelect id="task-by-project-select" value={''} onChange={handleChangeTaskByProject}>
+                  <option value="">업무 선택</option>
+                  {tasksByProject.map((task: ITask) => (
+                    <option key={task.id} value={task.title}>
+                      {task.date} - {task.title}
+                      {task.contents ? `(${task.contents})` : ''}
+                    </option>
+                  ))}
+                </CSelect>
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="title-input">업무</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CInput
+                  id="title-input"
+                  name="title"
+                  value={values.title}
+                  onChange={handleChange}
+                  placeholder="업무를 입력하세요. (주간회의, 스크럼회의, XXX 구현, XXX 검토)"
+                />
+                {errors.title && <span className="errorMessage">{errors.title}</span>}
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="contents-textarea">진행 내용</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CTextarea
+                  id="contents-textarea"
+                  name="contents"
+                  value={values.contents}
+                  onChange={handleChange}
+                  rows={5}
+                  placeholder="진행 내용..."
+                />
+                {errors.contents && <span className="errorMessage">{errors.contents}</span>}
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="link-input">링크</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CInput id="link-input" name="link" value={values.link} onChange={handleChange} placeholder="http://" />
+                {errors.link && <span className="errorMessage">{errors.link}</span>}
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="startTime-input">시작 시간</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CInput
+                  id="startTime-input"
+                  type="time"
+                  name="startTime"
+                  value={values.startTime}
+                  onChange={handleChange}
+                  placeholder="time"
+                />
+                {errors.startTime && <span className="errorMessage">{errors.startTime}</span>}
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="endTime-input">종료 시간</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CInput
+                  id="endTime-input"
+                  type="time"
+                  name="endTime"
+                  value={values.endTime}
+                  onChange={handleChange}
+                  placeholder="time"
+                />
+                {errors.endTime && <span className="errorMessage">{errors.endTime}</span>}
+              </CCol>
+            </CFormGroup>
+          </CModalBody>
+          <CModalFooter>
+            <CButton type="submit" size="sm" color="primary" disabled={submitting}>
+              <CIcon name="cil-scrubber" /> 저장
+            </CButton>
+          </CModalFooter>
+        </CForm>
+      </CModal>
+    </>
+  );
+};
+
+export default TaskEditor;

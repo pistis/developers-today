@@ -1,0 +1,7 @@
+const IPC_RENDERER_ON_MESSAGE = 'IPC_RENDERER_ON_MESSAGE';
+const DELAY_TIME = 250;
+
+module.exports = {
+  IPC_RENDERER_ON_MESSAGE,
+  DELAY_TIME,
+};

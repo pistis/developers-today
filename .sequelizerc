@@ -1,0 +1,8 @@
+const path = require('path');
+
+module.exports = {
+  'config': path.resolve('electron/sqlite/config/config.js'),
+  'models-path': path.resolve('electron/sqlite/models'),
+  'seeders-path': path.resolve('electron/sqlite/seeders'),
+  'migrations-path': path.resolve('electron/sqlite/migrations')
+}

@@ -1,0 +1,1 @@
+sqlite directory는 sequelize cli를 통해 만든 sqlite3 database scheme 코드
