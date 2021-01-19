@@ -16,7 +16,7 @@ import CIcon from '@coreui/icons-react';
 // routes config
 import routes from '../routes';
 
-import logo from 'src/assets/today.png';
+import Logo from 'src/layout/Logo';
 
 // import { TheHeaderDropdown, TheHeaderDropdownMssg, TheHeaderDropdownNotif, TheHeaderDropdownTasks } from './index';
 
@@ -40,7 +40,8 @@ const TheHeader = () => {
       <CToggler inHeader className="ml-3 d-md-down-none" onClick={toggleSidebar} />
       <CHeaderBrand className="mx-auto d-lg-none" to="/">
         {/* <CIcon name="logo" height="48" alt="Logo" /> */}
-        <img src={logo} height={48} className="c-avatar-img" alt="Developer's Today" />
+        <Logo width={40} height={40} />
+        &nbsp;&nbsp;&nbsp;Developer's Today
       </CHeaderBrand>
 
       <CHeaderNav className="d-md-down-none mr-auto">
