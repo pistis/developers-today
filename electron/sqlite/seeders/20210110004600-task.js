@@ -8,7 +8,7 @@ module.exports = {
         categoryId: 1,
         date: '2021-01-11',
         title: '하루 업무 준비',
-        contents: '스크럼 업데이트',
+        contents: '메일 확인, 오늘 할 일 list up',
         link: '',
         estimationMinutes: null,
         startTime: '10:00:00',

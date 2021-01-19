@@ -17,7 +17,7 @@ module.exports = {
       },
       {
         name: 'Break Time',
-        description: '업무 전환, 점심 시간, 커피, 웹서핑 등',
+        description: '점심 시간, 커피, 웹서핑 등의 휴식',
         type: 'PERSONAL',
         startDate: '2021-01-01',
         createdAt,
@@ -34,7 +34,7 @@ module.exports = {
       },
       {
         name: 'Recruitment Activities 2021',
-        description: '2021년 채용 프로젝트(서류 검토, 1차 기술 면접관)',
+        description: '2021년 채용 프로젝트(서류 검토, 기술 면접관)',
         type: 'TEAM',
         startDate: '2021-01-01',
         endDate: '2021-12-31',
@@ -42,8 +42,16 @@ module.exports = {
         updatedAt,
       },
       {
-        name: '회사의 매우 중요한 프로젝트',
-        description: '회사의 매우 중요한 프로젝트 블라블라',
+        name: 'Hot Project 2021',
+        description: '2021년 회사의 매우 Hot 한 프로젝트',
+        type: 'PRODUCT',
+        startDate: '2021-01-01',
+        createdAt,
+        updatedAt,
+      },
+      {
+        name: 'Small Project 2021',
+        description: '2021년 작은 프로젝트 one',
         type: 'PRODUCT',
         startDate: '2020-11-30',
         createdAt,

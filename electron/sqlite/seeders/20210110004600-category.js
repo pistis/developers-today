@@ -20,7 +20,13 @@ module.exports = {
         updatedAt,
       },
       {
-        name: 'Code Review',
+        name: 'Code Review (for My PR)',
+        description: 'Pull Request/offline Code Review',
+        createdAt,
+        updatedAt,
+      },
+      {
+        name: 'Code Review (for co-worker PR)',
         description: 'Pull Request/offline Code Review',
         createdAt,
         updatedAt,
@@ -31,7 +37,6 @@ module.exports = {
         createdAt,
         updatedAt,
       },
-
       {
         name: 'MTG',
         description: '미팅',
@@ -53,7 +58,7 @@ module.exports = {
       },
       {
         name: 'Communication',
-        description: 'mail, slack, line',
+        description: 'mail, slack',
         createdAt,
         updatedAt,
       },
