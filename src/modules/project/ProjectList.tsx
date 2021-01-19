@@ -1,6 +1,7 @@
 import { IProject } from 'src/@types';
-import React, { useState } from 'react';
+import React from 'react';
 import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse } from '@coreui/react';
+import useToggleFlags, { IReturnUseToggleFlags } from 'src/modules/common/hooks/useToggleFlags';
 
 type Props = {
   projects: IProject[];
@@ -9,7 +10,6 @@ type Props = {
 };
 
 const ProjectList: React.FC<Props> = ({ projects, onEditButton, onDeleteButton }) => {
-  console.log('### projects : ', projects);
   const fields = [
     { key: 'name', _style: { width: '45%' } },
     { key: 'type', _style: { width: '15%' } },
@@ -34,26 +34,27 @@ const ProjectList: React.FC<Props> = ({ projects, onEditButton, onDeleteButton }
       endDate: project.endDate ? project.endDate : '-',
     };
   });
-  const initialValues: number[] = [];
-  const [details, setDetails] = useState(initialValues);
 
-  const toggleDetails = (index: number) => {
-    const position = details.indexOf(index);
-    let newDetails = details.slice();
-    if (position !== -1) {
-      newDetails.splice(position, 1);
-    } else {
-      newDetails = [...details, index];
-    }
-    setDetails(newDetails);
-  };
+  const allToggleFlags = projects.map((project: IProject) => project.id!);
+  const { showAll, hideAll, toggle, toggleFlags }: IReturnUseToggleFlags<number> = useToggleFlags<number>({
+    initialValues: [],
+    allValues: allToggleFlags,
+  });
 
   return (
     <>
       <CRow>
         <CCol xs="12" lg="12">
           <CCard>
-            <CCardHeader>나의 프로젝트</CCardHeader>
+            <CCardHeader>
+              나의 프로젝트
+              <CButton color="info" variant="outline" size="sm" className="ml-1" onClick={showAll}>
+                전체 보기
+              </CButton>
+              <CButton color="info" variant="outline" size="sm" className="ml-1" onClick={hideAll}>
+                전체 감추기
+              </CButton>
+            </CCardHeader>
             <CCardBody>
               <CDataTable
                 items={projectData}
@@ -61,7 +62,7 @@ const ProjectList: React.FC<Props> = ({ projects, onEditButton, onDeleteButton }
                 hover
                 sorter
                 scopedSlots={{
-                  show_details: (_item: any, index: number) => {
+                  show_details: (item: any) => {
                     return (
                       <td className="py-2">
                         <CButton
@@ -69,16 +70,16 @@ const ProjectList: React.FC<Props> = ({ projects, onEditButton, onDeleteButton }
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toggleDetails(index);
+                            toggle(item.id);
                           }}>
-                          {details.includes(index) ? '감추기' : '보기'}
+                          {toggleFlags.includes(item.id) ? '감추기' : '보기'}
                         </CButton>
                       </td>
                     );
                   },
-                  details: (item: any, index: number) => {
+                  details: (item: any) => {
                     return (
-                      <CCollapse show={details.includes(index)}>
+                      <CCollapse show={toggleFlags.includes(item.id)}>
                         <CCardBody>
                           <p className="text-muted">{item.description}</p>
                           <CButton

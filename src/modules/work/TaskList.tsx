@@ -1,8 +1,9 @@
 import { ITask } from 'src/@types';
-import React, { useState } from 'react';
+import React from 'react';
+import moment from 'moment';
 import { CCard, CCardBody, CCardHeader, CDataTable, CButton, CCollapse } from '@coreui/react';
 import { millisec2Minutes, minutes2HHMM, getDayLabel } from '../common/lib/util';
-import moment from 'moment';
+import useToggleFlags, { IReturnUseToggleFlags } from 'src/modules/common/hooks/useToggleFlags';
 
 type Props = {
   date: string;
@@ -54,37 +55,22 @@ const TaskList: React.FC<Props> = ({ date, tasks, onEditButton, onDeleteButton }
       endTime: endTime ? endTime : '-',
     };
   });
-  const initialValues: number[] = [];
-  const [details, setDetails] = useState(initialValues);
 
-  const toggleDetails = (index: number) => {
-    const position = details.indexOf(index);
-    let newDetails = details.slice();
-    if (position !== -1) {
-      newDetails.splice(position, 1);
-    } else {
-      newDetails = [...details, index];
-    }
-    setDetails(newDetails);
-  };
-
-  const toggleShowDetails = () => {
-    setDetails(tasks.map((_task, index) => index));
-  };
-
-  const toggleHideDetails = () => {
-    setDetails([]);
-  };
+  const allToggleFlags = tasks.map((task: ITask) => task.id!);
+  const { showAll, hideAll, toggle, toggleFlags }: IReturnUseToggleFlags<number> = useToggleFlags<number>({
+    initialValues: [],
+    allValues: allToggleFlags,
+  });
 
   return (
     <>
       <CCard>
         <CCardHeader>
           {date}({getDayLabel(new Date(date))}) 업무
-          <CButton color="info" variant="outline" size="sm" className="ml-1" onClick={toggleShowDetails}>
+          <CButton color="info" variant="outline" size="sm" className="ml-1" onClick={showAll}>
             전체 보기
           </CButton>
-          <CButton color="info" variant="outline" size="sm" className="ml-1" onClick={toggleHideDetails}>
+          <CButton color="info" variant="outline" size="sm" className="ml-1" onClick={hideAll}>
             전체 감추기
           </CButton>
         </CCardHeader>
@@ -95,7 +81,7 @@ const TaskList: React.FC<Props> = ({ date, tasks, onEditButton, onDeleteButton }
             hover
             sorter
             scopedSlots={{
-              show_details: (_item: any, index: number) => {
+              show_details: (item: any) => {
                 return (
                   <td className="py-2">
                     <CButton
@@ -103,16 +89,16 @@ const TaskList: React.FC<Props> = ({ date, tasks, onEditButton, onDeleteButton }
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        toggleDetails(index);
+                        toggle(item.id);
                       }}>
-                      {details.includes(index) ? '감추기' : '보기'}
+                      {toggleFlags.includes(item.id) ? '감추기' : '보기'}
                     </CButton>
                   </td>
                 );
               },
-              details: (item: any, index: number) => {
+              details: (item: any) => {
                 return (
-                  <CCollapse show={details.includes(index)}>
+                  <CCollapse show={toggleFlags.includes(item.id)}>
                     <CCardBody>
                       <p className="text-muted">{item.link}</p>
                       <p className="text-muted">{item.contents}</p>
