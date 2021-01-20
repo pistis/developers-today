@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import { Calendar, OnChangeProps } from 'react-date-range';
 import WorkDetail from './WorkDetail';
 
 const Work: React.FC = () => {
   const [value, setValue] = useState(new Date());
 
-  const onChange = (date: Date | Date[]) => {
-    setValue(date as Date);
+  const onChange = (range: OnChangeProps) => {
+    setValue(range as Date);
   };
   return (
     <>
@@ -17,7 +16,7 @@ const Work: React.FC = () => {
         <CCol xs="12" lg="12">
           <CCard>
             <CCardBody>
-              <Calendar onChange={onChange} value={value} />
+              <Calendar date={new Date()} onChange={onChange} />
             </CCardBody>
           </CCard>
         </CCol>
