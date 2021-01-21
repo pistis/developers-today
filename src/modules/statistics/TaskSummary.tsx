@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import _ from 'lodash';
 import { CCard, CCardBody, CButton, CCardHeader, CCollapse } from '@coreui/react';
 import { groupBy } from 'src/modules/common/lib/summary';
 import { getSpentTimeMinutes, minutes2HHMM } from 'src/modules/common/lib/util';
@@ -101,8 +102,8 @@ const TaskSummary: React.FC<Props> = ({ titie, projects, categories, tasks }) =>
       groupByCategory: byCategory.map(({ categoryId, data }) => {
         const byTitle = groupBy(data, 'title');
         const tasks = byTitle.map(({ title, data }) => {
-          const links = data.filter(({ link }) => link).map(({ link }) => link);
-          const contents = data.filter(({ contents }) => contents).map(({ contents }) => contents);
+          const links = _.uniq(data.filter(({ link }) => link).map(({ link }) => link));
+          const contents = _.uniq(data.filter(({ contents }) => contents).map(({ contents }) => contents));
           return {
             title: title,
             spentTime: getSpentTimeMinutes(data),
