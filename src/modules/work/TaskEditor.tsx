@@ -11,35 +11,7 @@ import useTaskListByProject from 'src/modules/common/hooks/api/useTaskListByProj
 import validate from './validate';
 import TaskApi from './api';
 import moment from 'moment';
-
-const checkAllowTaskTime = (tasks: ITask[], task: ITask) => {
-  const taskId = task.id;
-  const newStartTimeMs = task.startTime ? moment.duration(task.startTime).asMilliseconds() : -1;
-  const newEndTimeMs = task.endTime ? moment.duration(task.endTime).asMilliseconds() : -1;
-
-  let times = tasks.map((task: ITask) => {
-    const endTimeMs = task.endTime ? moment.duration(task.endTime).asMilliseconds() : -1;
-    const startTimeMs = task.startTime ? moment.duration(task.startTime).asMilliseconds() : -1;
-    return {
-      id: task.id,
-      title: task.title,
-      startTimeMs,
-      endTimeMs,
-    };
-  });
-
-  times = times.filter(({ startTimeMs, endTimeMs }: any) => {
-    return startTimeMs >= 0 && endTimeMs >= 0;
-  });
-
-  times.forEach(({ id, title, startTimeMs, endTimeMs }: any) => {
-    if (id === taskId) return;
-    if (startTimeMs < newStartTimeMs && newStartTimeMs < endTimeMs)
-      throw new Error(`업무(${title})의 시작/종료 시간과 겹칩니다.`);
-    if (startTimeMs < newEndTimeMs && newEndTimeMs < endTimeMs)
-      throw new Error(`업무(${title})의 시작/종료 시간과 겹칩니다.`);
-  });
-};
+import { getOverlapTimeTask } from './util';
 
 type TaskEditorProps = {
   show: boolean;
@@ -114,12 +86,20 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
       }
 
       try {
+        const targetTasks = updatingTask ? tasks.filter((task: ITask) => task.id != updatingTask.id) : tasks;
+        const startTimeOverlapTask = getOverlapTimeTask(targetTasks, task.startTime);
+        if (startTimeOverlapTask) {
+          throw new Error(`업무(${startTimeOverlapTask.title})의 시작/종료 시간과 겹칩니다.`);
+        }
+        const endTimeOverlapTask = getOverlapTimeTask(targetTasks, task.startTime);
+        if (endTimeOverlapTask) {
+          throw new Error(`업무(${endTimeOverlapTask.title})의 시작/종료 시간과 겹칩니다.`);
+        }
+
         if (updatingTask) {
           task.id = updatingTask.id;
-          checkAllowTaskTime(tasks, task);
           await TaskApi.update(task);
         } else {
-          checkAllowTaskTime(tasks, task);
           await TaskApi.create(task);
         }
 

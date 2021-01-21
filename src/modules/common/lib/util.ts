@@ -1,4 +1,5 @@
 import moment from 'moment';
+import CONSTANTS from 'src/constants';
 /**
  *
  * @param date 20201229
@@ -15,14 +16,13 @@ export const compositeStr2Date = (dateStr: string, hoursMinutes: string) => {
   return date;
 };
 
-const SQLITE_DATETIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 /**
  * SQLite는 timezone 미지원, 저장된 DB의 값은 UTC로 변환되어 있음
  * 'YYYY-MM-DD HH:mm:ss' 로 변환하여 DB에 저장
  * @param dateStr
  */
 export const convertDateTimeStringForSQLite = (date: Date) => {
-  return moment(date).format(SQLITE_DATETIME_FORMAT);
+  return moment(date).format(CONSTANTS.SQLITE_DATETIME_FORMAT);
 };
 
 export const getSpentTimeMinutes = (tasks: any): number => {
@@ -63,7 +63,15 @@ export const getRandomColor = () => {
 };
 
 export const toYYYYMMDD = (date: Date) => {
-  return moment(date).format('YYYY-MM-DD');
+  return moment(date).format(CONSTANTS.MOMENT_DATE_FORMAT);
+};
+
+export const toHHMMSS = (date: Date) => {
+  return moment(date).format(CONSTANTS.MOMENT_TIME_FORMAT);
+};
+
+export const toMs = (strTime: string) => {
+  return moment.duration(strTime).asMilliseconds();
 };
 
 export const toPercentile = (total: number, amount: number, digit = 1): string => {

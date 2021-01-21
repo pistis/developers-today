@@ -1,0 +1,6 @@
+const CONSTANTS = {
+  SQLITE_DATETIME_FORMAT: 'YYYY-MM-DD HH:mm:ss',
+  MOMENT_DATE_FORMAT: 'YYYY-MM-DD',
+  MOMENT_TIME_FORMAT: 'HH:mm:ss',
+};
+export default CONSTANTS;

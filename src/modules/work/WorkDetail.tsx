@@ -1,7 +1,7 @@
 import { ITask } from 'src/@types';
 import React, { useState } from 'react';
 import { CCard, CCardBody, CCol, CRow, CButton } from '@coreui/react';
-import { getDayLabel } from 'src/modules/common/lib/util';
+import { getDayLabel, toHHMMSS, toMs } from 'src/modules/common/lib/util';
 
 import useTaskList from 'src/modules/common/hooks/api/useTaskList';
 import useProjectList from 'src/modules/common/hooks/api/useProjectList';
@@ -14,6 +14,8 @@ import TaskApi from './api';
 
 import TaskStatistics from '../statistics/TaskStatistics';
 import TaskSummary from '../statistics/TaskSummary';
+
+import { getOverlapTimeTask } from './util';
 
 interface IWorkDetailProps {
   date: string;
@@ -54,7 +56,72 @@ const WorkDetail: React.FC<IWorkDetailProps> = ({ date }) => {
       await TaskApi.delete(taskId);
       refresh();
     } catch (e) {
-      alert(`업무 삭제 오류 : ${e.toSting()}`);
+      alert(`업무 삭제 오류 : ${e}`);
+    }
+  };
+
+  const startTask = async (taskId: number) => {
+    const task = tasks.find((task) => task.id == taskId);
+    if (!task) return;
+
+    try {
+      const now = new Date();
+      now.setSeconds(0);
+      const startTime = toHHMMSS(now);
+
+      const targetTasks = tasks.filter((task) => task.id != taskId);
+      const overlapTask = getOverlapTimeTask(targetTasks, startTime);
+      if (overlapTask) {
+        throw new Error(`업무(${overlapTask.title})의 시작/종료 시간과 겹칩니다.`);
+      }
+
+      const updateTask = { ...task, startTime };
+      if (task.endTime && toMs(startTime) >= toMs(task.endTime)) {
+        throw new Error(`업무의 종료시간보다 이후에 시작할 수 없습니다.`);
+      }
+      await TaskApi.update(updateTask);
+      refresh();
+    } catch (e) {
+      alert(`업무 시작 오류 : ${e}`);
+    }
+  };
+
+  const endTask = async (taskId: number) => {
+    const task = tasks.find((task) => task.id == taskId);
+    if (!task) return;
+
+    try {
+      const now = new Date();
+      now.setSeconds(0);
+      const endTime = toHHMMSS(now);
+
+      const targetTasks = tasks.filter((task) => task.id != taskId);
+      const overlapTask = getOverlapTimeTask(targetTasks, endTime);
+      if (overlapTask) {
+        throw new Error(`업무(${overlapTask.title})의 시작/종료 시간과 겹칩니다.`);
+      }
+
+      const updateTask = { ...task, endTime };
+      if (task.startTime && toMs(task.startTime) >= toMs(endTime)) {
+        throw new Error(`업무의 시작시간보다 이전에 종료할 수 없습니다.`);
+      }
+      await TaskApi.update(updateTask);
+      refresh();
+    } catch (e) {
+      alert(`업무 시작 오류 : ${e}`);
+    }
+  };
+
+  const resetTimeTask = async (taskId: number) => {
+    const task = tasks.find((task) => task.id == taskId);
+    if (!task) return;
+
+    try {
+      const updateTask = { ...task, startTime: '', endTime: '' };
+      await TaskApi.update(updateTask);
+      refresh();
+    } catch (e) {
+      alert(`업무 시간 초기화 오류 : ${e}`);
     }
   };
 
@@ -140,7 +207,15 @@ const WorkDetail: React.FC<IWorkDetailProps> = ({ date }) => {
       </CRow>
       <CRow>
         <CCol xs="12" lg="12">
-          <TaskList date={date} tasks={tasks} onDeleteButton={deleteTask} onEditButton={editTask} />
+          <TaskList
+            date={date}
+            tasks={tasks}
+            onDeleteButton={deleteTask}
+            onEditButton={editTask}
+            onStartButton={startTask}
+            onEndButton={endTask}
+            onResetButton={resetTimeTask}
+          />
         </CCol>
       </CRow>
     </>

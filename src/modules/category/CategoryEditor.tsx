@@ -53,7 +53,7 @@ const CategoryEditor: React.FC<CategoryEditorProps> = ({ show, category: updatin
         clear();
         onUpdated();
       } catch (e) {
-        alert(`카테고리 생성 오류 : ${e.toSting()}`);
+        alert(`카테고리 생성 오류 : ${e}`);
       }
     },
     validate,

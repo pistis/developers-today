@@ -38,7 +38,7 @@ const Category: React.FC = () => {
       await CategoryApi.delete(categoryId);
       refresh();
     } catch (e) {
-      alert(`Category 삭제 오류 : ${e.toSting()}`);
+      alert(`Category 삭제 오류 : ${e}`);
     }
   };
 

@@ -64,7 +64,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({ show, project: updatingPr
           clear();
           onUpdated();
         } catch (e) {
-          alert(`프로젝트 생성 오류 : ${e.toSting()}`);
+          alert(`프로젝트 생성 오류 : ${e}`);
         }
       },
       validate,

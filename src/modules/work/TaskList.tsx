@@ -10,9 +10,20 @@ type Props = {
   tasks: ITask[];
   onEditButton: (taskId: number) => void;
   onDeleteButton: (taskId: number) => void;
+  onStartButton: (taskId: number) => void;
+  onEndButton: (taskId: number) => void;
+  onResetButton: (taskId: number) => void;
 };
 
-const TaskList: React.FC<Props> = ({ date, tasks, onEditButton, onDeleteButton }) => {
+const TaskList: React.FC<Props> = ({
+  date,
+  tasks,
+  onEditButton,
+  onDeleteButton,
+  onStartButton,
+  onEndButton,
+  onResetButton,
+}) => {
   const fields = [
     { key: 'project', _style: { width: '15%' } },
     { key: 'category', _style: { width: '15%' } },
@@ -104,7 +115,35 @@ const TaskList: React.FC<Props> = ({ date, tasks, onEditButton, onDeleteButton }
                       <p className="text-muted">{item.contents}</p>
                       <CButton
                         size="sm"
+                        color="success"
+                        onClick={() => {
+                          onStartButton(item.id);
+                        }}>
+                        시작
+                      </CButton>
+                      <CButton
+                        size="sm"
+                        color="dark"
+                        className="ml-1"
+                        onClick={() => {
+                          onEndButton(item.id);
+                        }}>
+                        종료
+                      </CButton>
+                      <CButton
+                        size="sm"
+                        color="warning"
+                        className="ml-1"
+                        onClick={() => {
+                          onResetButton(item.id);
+                        }}>
+                        시간 초기화
+                      </CButton>
+
+                      <CButton
+                        size="sm"
                         color="info"
+                        className="ml-1"
                         onClick={() => {
                           onEditButton(item.id);
                         }}>

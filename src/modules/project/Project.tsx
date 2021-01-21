@@ -38,7 +38,7 @@ const Project: React.FC = () => {
       await ProjectApi.delete(projectId);
       refresh();
     } catch (e) {
-      alert(`Project 삭제 오류 : ${e.toSting()}`);
+      alert(`Project 삭제 오류 : ${e}`);
     }
   };
 
