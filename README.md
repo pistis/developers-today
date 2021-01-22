@@ -58,7 +58,7 @@
 
 현재 Mac OS만 지원합니다.
 
-**[v0.0.4 download](https://www.dropbox.com/s/sdwb97kuyypaeq2/Developers%20Today-0.0.4.dmg?dl=0)**
+**[v0.0.5 download](https://www.dropbox.com/s/m3ajm0fd52wc4k4/Developers%20Today-0.0.5.dmg?dl=0)**
 
 ## 버그 제보 또는 기능 개선 요청
 - 버그가 있다면 자유롭게 이슈에 등록해주세요.
