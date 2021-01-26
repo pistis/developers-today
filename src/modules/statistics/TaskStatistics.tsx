@@ -2,95 +2,21 @@ import { IProject, ICategory, ITask } from 'src/@types';
 import React, { useState } from 'react';
 import { CCard, CCardBody, CButton, CCardHeader, CCollapse } from '@coreui/react';
 import { CNav, CNavItem, CNavLink, CTabContent, CTabPane, CTabs } from '@coreui/react';
-import { CChartPie } from '@coreui/react-chartjs';
-import { projectStatistics, categoryStatistics, titleStatistics } from 'src/modules/common/lib/statistics';
-import { minutes2HHMM, getRandomColor, toPercentile } from 'src/modules/common/lib/util';
+import StatisticsByProject from './StatisticsByProject';
+import StatisticsByCategory from './StatisticsByCategory';
+import StatisticsByTitle from './StatisticsByTitle';
 
-type Props = {
+type IProps = {
   title: string;
   projects: IProject[];
   categories: ICategory[];
   tasks: ITask[];
 };
 
-const TaskStatistics: React.FC<Props> = ({ title, projects, categories, tasks }) => {
-  const { projectTotalSpentMinutes, projectGroupTasks } = projectStatistics(projects, tasks);
-  const { categoryTotalSpentMinutes, categoryGroupTasks } = categoryStatistics(categories, tasks);
-  const { titleTotalSpentMinutes, titleGroupTasks } = titleStatistics(tasks);
-
-  // // for project
-  const projectChartData = {
-    datasets: [
-      {
-        backgroundColor: projectGroupTasks.map(() => getRandomColor()),
-        data: projectGroupTasks.map(({ minutes }) => minutes),
-      },
-    ],
-    labels: projectGroupTasks.map(
-      ({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)} (${toPercentile(projectTotalSpentMinutes, minutes)})`
-    ),
-    options: {
-      tooltips: {
-        enabled: true,
-        callbacks: {
-          label: function (tooltipItem: any, data: any) {
-            return data.labels[tooltipItem.index];
-          },
-        },
-      },
-    },
-  };
-
-  // for category
-  const categoryChartData = {
-    datasets: [
-      {
-        backgroundColor: categoryGroupTasks.map(() => getRandomColor()),
-        data: categoryGroupTasks.map(({ minutes }) => minutes),
-      },
-    ],
-    labels: categoryGroupTasks.map(
-      ({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)} (${toPercentile(categoryTotalSpentMinutes, minutes)})`
-    ),
-    options: {
-      tooltips: {
-        enabled: true,
-        callbacks: {
-          label: function (tooltipItem: any, data: any) {
-            return data.labels[tooltipItem.index];
-          },
-        },
-      },
-    },
-  };
-
-  // for title
-  const titleChartData = {
-    datasets: [
-      {
-        backgroundColor: titleGroupTasks.map(() => getRandomColor()),
-        data: titleGroupTasks.map(({ minutes }) => minutes),
-      },
-    ],
-    labels: titleGroupTasks.map(
-      ({ name, minutes }) => `${name}: ${minutes2HHMM(minutes)} (${toPercentile(titleTotalSpentMinutes, minutes)})`
-    ),
-    options: {
-      tooltips: {
-        enabled: true,
-        callbacks: {
-          label: function (tooltipItem: any, data: any) {
-            return data.labels[tooltipItem.index];
-          },
-        },
-      },
-    },
-  };
-
-  // summary
-  const [summaryCollapse, setSummaryCollapse] = useState(false);
-  const summaryToggle = (e: React.MouseEvent<any>) => {
-    setSummaryCollapse(!summaryCollapse);
+const TaskStatistics: React.FC<IProps> = ({ title, projects, categories, tasks }) => {
+  const [collapse, setCollapse] = useState(false);
+  const toggle = (e: React.MouseEvent<any>) => {
+    setCollapse(!collapse);
     e.preventDefault();
   };
 
@@ -98,11 +24,11 @@ const TaskStatistics: React.FC<Props> = ({ title, projects, categories, tasks })
     <CCard>
       <CCardHeader>
         {title}
-        <CButton color="info" variant="outline" size="sm" className="ml-1" onClick={summaryToggle}>
-          {summaryCollapse ? '감추기' : '보기'}
+        <CButton color="info" variant="outline" size="sm" className="ml-1" onClick={toggle}>
+          {collapse ? '감추기' : '보기'}
         </CButton>
       </CCardHeader>
-      <CCollapse show={summaryCollapse}>
+      <CCollapse show={collapse}>
         <CCardBody>
           <CTabs activeTab="statistics-by-project">
             <CNav variant="tabs">
@@ -118,52 +44,13 @@ const TaskStatistics: React.FC<Props> = ({ title, projects, categories, tasks })
             </CNav>
             <CTabContent>
               <CTabPane data-tab="statistics-by-project">
-                <CCard>
-                  <CCardHeader>프로젝트별 업무 소요시간 (총 {minutes2HHMM(projectTotalSpentMinutes)})</CCardHeader>
-                  <CCardBody>
-                    {projectTotalSpentMinutes ? (
-                      <CChartPie
-                        datasets={projectChartData.datasets}
-                        labels={projectChartData.labels}
-                        options={projectChartData.options}
-                      />
-                    ) : (
-                      '-'
-                    )}
-                  </CCardBody>
-                </CCard>
+                <StatisticsByProject projects={projects} tasks={tasks} />
               </CTabPane>
               <CTabPane data-tab="statistics-by-category">
-                <CCard>
-                  <CCardHeader>카테고리별 업무 소요시간 (총 {minutes2HHMM(categoryTotalSpentMinutes)})</CCardHeader>
-                  <CCardBody>
-                    {categoryTotalSpentMinutes ? (
-                      <CChartPie
-                        datasets={categoryChartData.datasets}
-                        labels={categoryChartData.labels}
-                        options={categoryChartData.options}
-                      />
-                    ) : (
-                      '-'
-                    )}
-                  </CCardBody>
-                </CCard>
+                <StatisticsByCategory categories={categories} tasks={tasks} />
               </CTabPane>
               <CTabPane data-tab="statistics-by-title">
-                <CCard>
-                  <CCardHeader>이슈별 업무 소요시간 (총 {minutes2HHMM(titleTotalSpentMinutes)})</CCardHeader>
-                  <CCardBody>
-                    {titleTotalSpentMinutes ? (
-                      <CChartPie
-                        datasets={titleChartData.datasets}
-                        labels={titleChartData.labels}
-                        options={titleChartData.options}
-                      />
-                    ) : (
-                      '-'
-                    )}
-                  </CCardBody>
-                </CCard>
+                <StatisticsByTitle tasks={tasks} />
               </CTabPane>
             </CTabContent>
           </CTabs>
