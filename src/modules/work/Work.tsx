@@ -16,7 +16,7 @@ const Work: React.FC = () => {
         <CCol xs="12" lg="12">
           <CCard>
             <CCardBody>
-              <Calendar date={new Date()} onChange={onChange} />
+              <Calendar date={value} onChange={onChange} />
             </CCardBody>
           </CCard>
         </CCol>
