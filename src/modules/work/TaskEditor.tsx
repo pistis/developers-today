@@ -63,7 +63,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
   const onSubmit = useCallback(
     async (values: ITask) => {
       const task: ITask = {
-        date: date,
+        date: values.date,
         projectId: Number(values.projectId),
         categoryId: Number(values.categoryId),
         title: values.title,
@@ -158,6 +158,14 @@ const TaskEditor: React.FC<TaskEditorProps> = ({
             <CModalTitle>{title}</CModalTitle>
           </CModalHeader>
           <CModalBody>
+            <CFormGroup row>
+              <CCol md="2">
+                <CLabel htmlFor="startDate">진행 일자</CLabel>
+              </CCol>
+              <CCol xs="12" md="10">
+                <CInput type="date" name="date" value={values.date} onChange={handleChange} placeholder="date" />
+              </CCol>
+            </CFormGroup>
             <CFormGroup row>
               <CCol md="2">
                 <CLabel htmlFor="project-select">프로젝트</CLabel>
