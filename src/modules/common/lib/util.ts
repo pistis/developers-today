@@ -62,6 +62,16 @@ export const getRandomColor = () => {
   return color;
 };
 
+export const hexToRgb = (hex: string): any => {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+};
 export const toYYYYMMDD = (date: Date) => {
   return moment(date).format(CONSTANTS.MOMENT_DATE_FORMAT);
 };
@@ -76,4 +86,22 @@ export const toMs = (strTime: string) => {
 
 export const toPercentile = (total: number, amount: number, digit = 1): string => {
   return `${((amount / total) * 100).toFixed(digit)}%`;
+};
+
+export const sortFunc = (key: string, asc: boolean = true) => {
+  let gt = 1;
+  let lt = -1;
+  if (!asc) {
+    gt = -1;
+    lt = 1;
+  }
+  return (a: any, b: any) => {
+    if (a[key] > b[key]) {
+      return gt;
+    }
+    if (a[key] < b[key]) {
+      return lt;
+    }
+    return 0;
+  };
 };
