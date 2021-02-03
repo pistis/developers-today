@@ -1,6 +1,6 @@
 {
   "name": "developers-today",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "pistis",
   "description": "A task management program that records and summarizes a developer's daily work.",
   "homepage": ".",
@@ -54,7 +54,7 @@
     "appId": "com.pistis.developers-today",
     "productName": "Developers Today",
     "copyright": "Copyright © 2021 pistis",
-    "buildVersion": "0.0.5-beta",
+    "buildVersion": "0.0.6-beta",
     "protocols": {
       "name": "devtoday",
       "schemes": [
