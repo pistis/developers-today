@@ -8,7 +8,10 @@
     - 장점 : 온라인에 그 어떤 정보도 저장하지 않음 (완벽한 오프라인 프로그램)
     - 단점 : 여러 기기 싱크 불가 :)
 2. 현재 손쉬운 db 백업/복원 기능이 없음(수동으로 prod.sqlite sqlite db를 복사하여 백업하고 새로운 버전을 설치해야함 :)
-3. 다운로드 링크 미제공(개발자에게 다이렉트로 받아야함 :))
+```bash
+$ cd /Applications/Developers Today.app/Contents/Resources/app
+$ cp ./prod.sqlite {mybackupdirectory}/prod.sqlite
+```
 
 **개발 동기 부여**
 - 필자는 2009년부터 2015년까지 : Google Docs등을 활용하여 개발 업무에 대한 정리를 해왔음
