@@ -17,6 +17,13 @@ import TaskSummary from '../statistics/TaskSummary';
 
 import { getOverlapTimeTask } from './util';
 
+
+const nowTime = (): string => {
+  const now = new Date();
+  now.setSeconds(0);
+  return toHHMMSS(now);
+}
+
 interface IWorkDetailProps {
   date: string;
 }
@@ -65,9 +72,7 @@ const WorkDetail: React.FC<IWorkDetailProps> = ({ date }) => {
     if (!task) return;
 
     try {
-      const now = new Date();
-      now.setSeconds(0);
-      const startTime = toHHMMSS(now);
+      const startTime = nowTime();
 
       const targetTasks = tasks.filter((task) => task.id != taskId);
       const overlapTask = getOverlapTimeTask(targetTasks, startTime);
@@ -91,9 +96,7 @@ const WorkDetail: React.FC<IWorkDetailProps> = ({ date }) => {
     if (!task) return;
 
     try {
-      const now = new Date();
-      now.setSeconds(0);
-      const endTime = toHHMMSS(now);
+      const endTime = nowTime();
 
       const targetTasks = tasks.filter((task) => task.id != taskId);
       const overlapTask = getOverlapTimeTask(targetTasks, endTime);
@@ -122,6 +125,28 @@ const WorkDetail: React.FC<IWorkDetailProps> = ({ date }) => {
       refresh();
     } catch (e) {
       alert(`업무 시간 초기화 오류 : ${e}`);
+    }
+  };
+
+  const restartTask = async (taskId: number) => {
+    const task = tasks.find((task) => task.id == taskId);
+    if (!task) return;
+
+    try {
+      const newTask = { ...task, startTime: '', endTime: '' };
+      delete newTask.id;
+
+      const startTime = nowTime();
+
+      const overlapTask = getOverlapTimeTask(tasks, startTime);
+      if (!overlapTask) {
+        newTask.startTime = startTime;
+      }
+
+      await TaskApi.create(newTask);
+      refresh();
+    } catch (e) {
+      alert(`업무 재시작 오류 : ${e}`);
     }
   };
 
@@ -215,6 +240,7 @@ const WorkDetail: React.FC<IWorkDetailProps> = ({ date }) => {
             onStartButton={startTask}
             onEndButton={endTask}
             onResetButton={resetTimeTask}
+            onCopyButton={restartTask}
           />
         </CCol>
       </CRow>

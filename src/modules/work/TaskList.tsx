@@ -13,6 +13,7 @@ type Props = {
   onStartButton: (taskId: number) => void;
   onEndButton: (taskId: number) => void;
   onResetButton: (taskId: number) => void;
+  onCopyButton: (taskId: number) => void;
 };
 
 const TaskList: React.FC<Props> = ({
@@ -23,6 +24,7 @@ const TaskList: React.FC<Props> = ({
   onStartButton,
   onEndButton,
   onResetButton,
+  onCopyButton,
 }) => {
   const fields = [
     { key: 'project', _style: { width: '15%' } },
@@ -158,6 +160,15 @@ const TaskList: React.FC<Props> = ({
                           onDeleteButton(item.id);
                         }}>
                         삭제
+                      </CButton>
+                      <CButton
+                        size="sm"
+                        color="success"
+                        className="ml-1"
+                        onClick={() => {
+                          onCopyButton(item.id);
+                        }}>
+                        재시작
                       </CButton>
                     </CCardBody>
                   </CCollapse>
