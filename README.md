@@ -61,7 +61,7 @@ $ cp ./prod.sqlite {mybackupdirectory}/prod.sqlite
 
 현재 Mac OS만 지원합니다.
 
-**[v0.0.6 download](https://www.dropbox.com/s/7pjgv69hz87zgs2/Developers%20Today-0.0.7.dmg?dl=0)**
+**[v0.0.7 download](https://www.dropbox.com/s/7pjgv69hz87zgs2/Developers%20Today-0.0.7.dmg?dl=0)**
 
 ## 버그 제보 또는 기능 개선 요청
 - 버그가 있다면 자유롭게 이슈에 등록해주세요.
